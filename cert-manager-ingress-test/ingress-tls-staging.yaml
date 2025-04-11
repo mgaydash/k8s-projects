@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-stage"
+  labels:
+    app: httpd-example
+  name: httpd-example-tls-stage-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - tls-stage.k8s.mgaydash.com
+      secretName: httpd-example-tls-stage-secret
+  rules:
+    - host: tls-stage.k8s.mgaydash.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: httpd-example-service
+                port:
+                  number: 80

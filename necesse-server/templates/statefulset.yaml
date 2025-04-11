@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "necesse.fullname" . }}-service-headless
+  labels:
+    {{- include "necesse.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: 14159
+  selector:
+    {{- include "necesse.selectorLabels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "necesse.fullname" . }}-statefulset
+  labels:
+    {{- include "necesse.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "necesse.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "necesse.fullname" . }}-service-headless
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "necesse.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "necesse.fullname" . }}-game-server
+          image: pixil/necesse
+          env:
+            - name: WORLD_NAME
+              value: {{ .Values.env.world_name }}
+          ports:
+            - containerPort: {{ .Values.cfg.port }}
+              name: necesse
+          volumeMounts:
+            - name: {{ include "necesse.fullname" . }}-game-data
+              mountPath: /config
+            - name: general-config
+              mountPath: /config/cfg/server.cfg
+              subPath: server.cfg
+      volumes:
+        - name: general-config
+          configMap:
+            name: {{ include "necesse.fullname" . }}-configmap
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "necesse.fullname" . }}-game-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi

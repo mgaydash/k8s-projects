@@ -1,0 +1,13 @@
+app:
+  mode: 'dashboard'
+  ingress:
+    ingressClassName: nginx
+    enabled: true
+    hosts:
+      - dash.k8s.mgaydash.com
+    path: /
+    issuer:
+      name: letsencrypt-prod
+      scope: cluster
+    tls:
+      secretName: kubernetes-dashboard-tls-secret

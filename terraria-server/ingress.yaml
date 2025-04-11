@@ -1,0 +1,26 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  
+  name: {{ include "k8s-terraria-server.fullname" . }}
+  labels:
+    {{- include "k8s-terraria-server.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - terraria.k8s.dataforma.com
+      secretName: terraria.k8s.dataforma.com
+  rules:
+    - host: terraria.k8s.dataforma.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "k8s-terraria-server.fullname" . }}
+                port:
+                  number: 80

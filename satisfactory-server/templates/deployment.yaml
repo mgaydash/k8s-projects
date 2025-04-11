@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-satisfactory-server.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-satisfactory-server.selectorLabels" . | nindent 6 }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-satisfactory-server.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: satisfactory
+          image: wolveix/satisfactory-server:latest
+          imagePullPolicy: Always
+          env:
+            - name: DEBUG
+              value: "false"
+            - name: MAXPLAYERS
+              value: "4"
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: SKIPUPDATE
+              value: "false"
+            - name: STEAMBETA
+              value: "false"
+          ports:
+            - containerPort: 7777
+              protocol: TCP
+              name: gametcp
+            - containerPort: 7777
+              protocol: UDP
+              name: gameudp
+          volumeMounts:
+            - name: data
+              mountPath: /config
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "k8s-satisfactory-server.fullname" . }}
+

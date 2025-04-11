@@ -1,0 +1,12 @@
+cfg:
+  port: 14159
+  slots: 10
+  password: REPLACE_ME
+  pauseWhenEmpty: true
+  giveClientsPower: true
+  logging: true
+  language: en
+  zipSaves: true
+  motd: Oh Come all ye Faithful
+env:
+  world_name: Game Night

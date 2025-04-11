@@ -1,0 +1,10 @@
+config:
+  general:
+    ALLOWED_SENDER_DOMAINS: dataforma.com
+    RELAYHOST:
+    RELAYHOST_PASSWORD:
+    RELAYHOST_USERNAME:
+persistence:
+  enabled: false
+service:
+  port: 25

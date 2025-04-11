@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-core-keeper-server.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-core-keeper-server.selectorLabels" . | nindent 6 }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-core-keeper-server.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: corekeeper
+          image: escaping/core-keeper-dedicated
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: {{ include "k8s-core-keeper-server.fullname" . }}
+          ports:
+            - containerPort: 27015
+              protocol: UDP
+              name: gameudp
+          volumeMounts:
+            - name: data
+              mountPath: /home/steam/.config/unity3d/Pugstorm/Core Keeper/DedicatedServer/worlds
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "k8s-core-keeper-server.fullname" . }}

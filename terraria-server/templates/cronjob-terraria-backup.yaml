@@ -1,0 +1,48 @@
+{{- if .Values.enable_backup }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-terraria-server.fullname" . }}-backup
+spec:
+  schedule: "0 4 * * *"
+  timeZone: "America/New_York"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/instance
+                        operator: In
+                        values:
+                          - {{ .Release.Name }}
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - image: amazon/aws-cli:2.11.27
+              imagePullPolicy: IfNotPresent
+              name: {{ include "k8s-terraria-server.fullname" . }}-backup-aws
+              command:
+                - /bin/bash
+              args:
+                - -c
+                - |
+                  aws s3 cp \
+                    --no-progress \
+                    /data/The_Boys.wld \
+                    s3://backups.mgaydash.com/homelab0/{{ .Chart.Name }}/{{ .Release.Name }}/The_Boys_$(date +%Y-%m-%dT%H%M%S).wld
+              envFrom:
+                - secretRef:
+                    name: {{ include "k8s-terraria-server.fullname" . }}-creds
+              volumeMounts:
+                - name: data
+                  mountPath: "/data"
+          restartPolicy: Never
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ include "k8s-terraria-server.fullname" . }}-data
+{{- end }}

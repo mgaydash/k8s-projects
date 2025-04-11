@@ -1,0 +1,6 @@
+dependencies:
+- name: satisfactory
+  repository: https://98jan.github.io/helm-charts/
+  version: 0.1.3
+digest: sha256:882d05c75c1136a5bdf795200732599c3e11ee3dff63e285aa42302e5f1229a6
+generated: "2024-09-12T10:25:07.675872-04:00"

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-terraria-server.fullname" . }}
+  labels:
+    {{- include "k8s-terraria-server.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8s-terraria-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-terraria-server.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "ryshe/terraria:vanilla-latest"
+          imagePullPolicy: Always
+          args: 
+            - -autocreate
+            - "3"
+            - -password
+            - Dataforma1
+            - -port
+            - "7777"
+            - -world
+            - /data/The_Boys.wld
+            - -worldevil
+            - corrupt
+          ports:
+            - containerPort: 7777
+              protocol: TCP
+          resources:
+            limits:
+              memory: 4096Mi
+              cpu: 2000m
+            requests:
+              memory: 2048Mi
+              cpu: 1000m
+          volumeMounts:
+            - name: data
+              mountPath: "/data"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "k8s-terraria-server.fullname" . }}-data

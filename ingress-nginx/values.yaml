@@ -1,0 +1,6 @@
+tcp:
+  25565: "default/minecraft-minecraft:25565"
+  # 7777: "default/terraria-server-k8s-terraria-server:7777"
+  # 7777: "default/sat1-k8s-satisfactory-server:7777"
+udp:
+  # 7777: "default/sat1-k8s-satisfactory-server:7777"

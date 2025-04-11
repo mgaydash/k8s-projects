@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: httpd-example-service
+  labels:
+    app: httpd-example
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: httpd-example
+  type: ClusterIP

@@ -1,0 +1,51 @@
+{{- if .Values.enable_backup }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-satisfactory-server.fullname" . }}
+spec:
+  schedule: "0 4 * * 5"
+  timeZone: "America/New_York"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/instance
+                        operator: In
+                        values:
+                          - {{ .Release.Name }}
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - image: amazon/aws-cli:2.11.27
+              imagePullPolicy: IfNotPresent
+              name: {{ include "k8s-satisfactory-server.fullname" . }}-backup
+              command:
+                - /bin/bash
+              args:
+                - -c
+                - |
+                  set -x
+                  FILE_PATH=/config/saved/server
+                  FILE=$(ls -t1 ${FILE_PATH} | head -n 1)
+                  aws s3 cp \
+                    --no-progress \
+                    "${FILE_PATH}/${FILE}" \
+                    s3://backups.mgaydash.com/homelab0/{{ .Chart.Name }}/{{ .Release.Name }}/Save_$(date +%Y-%m-%dT%H%M%S).sav
+              envFrom:
+                - secretRef:
+                    name: {{ include "k8s-satisfactory-server.fullname" . }}
+              volumeMounts:
+                - name: data
+                  mountPath: /config
+          restartPolicy: Never
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ include "k8s-satisfactory-server.fullname" . }}
+{{- end }}
